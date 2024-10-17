@@ -2,7 +2,7 @@ use std::ffi::c_void;
 
 use anyhow::{anyhow, Result};
 use esp_idf_hal::{
-    gpio::{Pin, Pins},
+    gpio::{AnyIOPin, InputPin, OutputPin, Pin, Pins},
     i2c::{self, I2cConfig, I2cDriver},
     peripheral::Peripheral,
     prelude::Peripherals,
@@ -19,24 +19,24 @@ use esp_idf_sys::{
     ESP_OK,
 };
 
-pub struct CameraPeriphs {
-    pub i2c: i2c::I2C0,
-    pub sda: esp_idf_hal::gpio::Gpio13,
-    pub sdl: esp_idf_hal::gpio::Gpio3,
-    pub pin_pwdn: i32,
-    pub pin_reset: i32,
-    pub pin_xclk: i32,
-    pub pin_d7: i32,
-    pub pin_d6: i32,
-    pub pin_d5: i32,
-    pub pin_d4: i32,
-    pub pin_d3: i32,
-    pub pin_d2: i32,
-    pub pin_d1: i32,
-    pub pin_d0: i32,
-    pub pin_vsync: i32,
-    pub pin_href: i32,
-    pub pin_pclk: i32,
+pub struct CameraPeriphs<I> {
+    pub i2c: I,
+    pub sda: AnyIOPin,
+    pub sdl: AnyIOPin,
+    pub pin_pwdn: AnyIOPin,
+    pub pin_reset: AnyIOPin,
+    pub pin_xclk: AnyIOPin,
+    pub pin_d7: AnyIOPin,
+    pub pin_d6: AnyIOPin,
+    pub pin_d5: AnyIOPin,
+    pub pin_d4: AnyIOPin,
+    pub pin_d3: AnyIOPin,
+    pub pin_d2: AnyIOPin,
+    pub pin_d1: AnyIOPin,
+    pub pin_d0: AnyIOPin,
+    pub pin_vsync: AnyIOPin,
+    pub pin_href: AnyIOPin,
+    pub pin_pclk: AnyIOPin,
 }
 
 pub struct Camera<'d> {
@@ -44,25 +44,29 @@ pub struct Camera<'d> {
 }
 
 impl<'d> Camera<'d> {
-    pub fn configure(cpf: CameraPeriphs) -> Result<Self> {
+    pub fn configure<I>(cpf: CameraPeriphs<I>) -> Result<Self>
+    where
+        I: Peripheral + 'd,
+        I::P: i2c::I2c,
+    {
         let i2c_cfg = I2cConfig::new().baudrate(100000.into());
         let i2c = I2cDriver::new(cpf.i2c, cpf.sda, cpf.sdl, &i2c_cfg)?;
 
         let ccfg: camera_config_t = camera_config_t {
-            pin_pwdn: cpf.pin_pwdn,
-            pin_reset: cpf.pin_reset,
-            pin_xclk: cpf.pin_xclk,
-            pin_d7: cpf.pin_d7,
-            pin_d6: cpf.pin_d6,
-            pin_d5: cpf.pin_d5,
-            pin_d4: cpf.pin_d4,
-            pin_d3: cpf.pin_d3,
-            pin_d2: cpf.pin_d2,
-            pin_d1: cpf.pin_d1,
-            pin_d0: cpf.pin_d0,
-            pin_vsync: cpf.pin_vsync,
-            pin_href: cpf.pin_href,
-            pin_pclk: cpf.pin_pclk,
+            pin_pwdn: cpf.pin_pwdn.pin(),
+            pin_reset: cpf.pin_reset.pin(),
+            pin_xclk: cpf.pin_xclk.pin(),
+            pin_d7: cpf.pin_d7.pin(),
+            pin_d6: cpf.pin_d6.pin(),
+            pin_d5: cpf.pin_d5.pin(),
+            pin_d4: cpf.pin_d4.pin(),
+            pin_d3: cpf.pin_d3.pin(),
+            pin_d2: cpf.pin_d2.pin(),
+            pin_d1: cpf.pin_d1.pin(),
+            pin_d0: cpf.pin_d0.pin(),
+            pin_vsync: cpf.pin_vsync.pin(),
+            pin_href: cpf.pin_href.pin(),
+            pin_pclk: cpf.pin_pclk.pin(),
             xclk_freq_hz: 15000000,
             ledc_timer: ledc_timer_t_LEDC_TIMER_0,
             ledc_channel: ledc_channel_t_LEDC_CHANNEL_0,

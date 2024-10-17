@@ -34,6 +34,8 @@ esp-idf-hal = "0.44"
 esp-idf-sys = "0.35"
 anyhow = "1"
 heapless = "*"
+embedded-svc = "*"
+toml-cfg = "*"
 
 [build-dependencies]
 embuild = "0.32.0"
