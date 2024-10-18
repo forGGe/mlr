@@ -1,6 +1,5 @@
-use esp_idf_hal::{gpio::Pin, prelude::Peripherals};
-use esp_idf_sys::ESP_LWIP_ARP;
-
+use esp_idf_hal::gpio;
+use esp_idf_hal::prelude::Peripherals;
 mod con;
 mod espcam;
 mod imgup;
@@ -17,6 +16,8 @@ pub struct Config {
     uri: &'static str,
     #[default("")]
     apikey: &'static str,
+    #[default("")]
+    tbkey: &'static str,
 }
 
 fn main() {
@@ -30,6 +31,9 @@ fn main() {
     let pfs = Peripherals::take().unwrap();
 
     log::info!("Intercepting power...");
+    let pwr_pin = pfs.pins.gpio14;
+    let mut pwr_pin = gpio::PinDriver::output(pwr_pin).unwrap();
+    pwr_pin.set_high().unwrap();
     log::info!("Initializing and connecting to WiFi...");
     let wifi = con::associate(pfs.modem, CONFIG.ssid, CONFIG.pass).unwrap();
     log::info!("Configuring I2C...");
@@ -63,7 +67,14 @@ fn main() {
     loop {
         std::thread::sleep(std::time::Duration::from_secs(10));
         log::info!("Uploading image to HTTP endpoint...");
-        imgup::send(CONFIG.apikey, fb.slice()).unwrap();
+        match imgup::send(CONFIG.apikey, fb.slice()) {
+            Err(e) => {
+                log::error!("{}", e);
+            }
+            Ok(url) => {
+                log::info!("image uploaded with URL: {}", url);
+            }
+        }
         log::info!("tick...");
     }
 }

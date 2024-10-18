@@ -5,19 +5,9 @@ use esp_idf_hal::{
     gpio::{AnyIOPin, InputPin, OutputPin, Pin, Pins},
     i2c::{self, I2cConfig, I2cDriver},
     peripheral::Peripheral,
-    prelude::Peripherals,
 };
 
-use esp_idf_sys::{
-    camera::{
-        camera_config_t, camera_config_t__bindgen_ty_1, camera_config_t__bindgen_ty_2,
-        camera_fb_location_t_CAMERA_FB_IN_DRAM, camera_fb_t,
-        camera_grab_mode_t_CAMERA_GRAB_WHEN_EMPTY, esp_camera_fb_get, esp_camera_fb_return,
-        esp_camera_init, framesize_t_FRAMESIZE_VGA, ledc_channel_t_LEDC_CHANNEL_0,
-        ledc_timer_t_LEDC_TIMER_0, pixformat_t_PIXFORMAT_JPEG,
-    },
-    ESP_OK,
-};
+use esp_idf_sys::camera;
 
 pub struct CameraPeriphs<I> {
     pub i2c: I,
@@ -52,7 +42,7 @@ impl<'d> Camera<'d> {
         let i2c_cfg = I2cConfig::new().baudrate(100000.into());
         let i2c = I2cDriver::new(cpf.i2c, cpf.sda, cpf.sdl, &i2c_cfg)?;
 
-        let ccfg: camera_config_t = camera_config_t {
+        let ccfg: camera::camera_config_t = camera::camera_config_t {
             pin_pwdn: cpf.pin_pwdn.pin(),
             pin_reset: cpf.pin_reset.pin(),
             pin_xclk: cpf.pin_xclk.pin(),
@@ -68,22 +58,22 @@ impl<'d> Camera<'d> {
             pin_href: cpf.pin_href.pin(),
             pin_pclk: cpf.pin_pclk.pin(),
             xclk_freq_hz: 15000000,
-            ledc_timer: ledc_timer_t_LEDC_TIMER_0,
-            ledc_channel: ledc_channel_t_LEDC_CHANNEL_0,
-            pixel_format: pixformat_t_PIXFORMAT_JPEG,
-            frame_size: framesize_t_FRAMESIZE_VGA,
+            ledc_timer: camera::ledc_timer_t_LEDC_TIMER_0,
+            ledc_channel: camera::ledc_channel_t_LEDC_CHANNEL_0,
+            pixel_format: camera::pixformat_t_PIXFORMAT_JPEG,
+            frame_size: camera::framesize_t_FRAMESIZE_VGA,
             jpeg_quality: 10,
             fb_count: 1,
-            fb_location: camera_fb_location_t_CAMERA_FB_IN_DRAM,
-            grab_mode: camera_grab_mode_t_CAMERA_GRAB_WHEN_EMPTY,
+            fb_location: camera::camera_fb_location_t_CAMERA_FB_IN_DRAM,
+            grab_mode: camera::camera_grab_mode_t_CAMERA_GRAB_WHEN_EMPTY,
             sccb_i2c_port: i2c.port() as i32,
-            __bindgen_anon_1: camera_config_t__bindgen_ty_1 { pin_sscb_sda: -1 },
-            __bindgen_anon_2: camera_config_t__bindgen_ty_2 { pin_sscb_scl: -1 },
+            __bindgen_anon_1: camera::camera_config_t__bindgen_ty_1 { pin_sscb_sda: -1 },
+            __bindgen_anon_2: camera::camera_config_t__bindgen_ty_2 { pin_sscb_scl: -1 },
         };
 
-        let err = unsafe { esp_camera_init(&ccfg) };
+        let err = unsafe { camera::esp_camera_init(&ccfg) };
 
-        if err == ESP_OK {
+        if err == esp_idf_sys::ESP_OK {
             Ok(Self { _i2c: i2c })
         } else {
             Err(anyhow!("failed to configure the camera"))
@@ -92,7 +82,7 @@ impl<'d> Camera<'d> {
 
     pub fn get_data(&self) -> Result<Fb> {
         unsafe {
-            let fb_ptr = esp_camera_fb_get();
+            let fb_ptr = camera::esp_camera_fb_get();
             // TODO: wtf
             if fb_ptr as *mut c_void == (0 as *mut c_void) {
                 Err(anyhow!("failed to get the framebuffer"))
@@ -104,11 +94,11 @@ impl<'d> Camera<'d> {
 }
 
 pub struct Fb {
-    fb: *mut camera_fb_t,
+    fb: *mut camera::camera_fb_t,
 }
 
 impl Fb {
-    fn new(fb: *mut camera_fb_t) -> Self {
+    fn new(fb: *mut camera::camera_fb_t) -> Self {
         Self { fb }
     }
 
@@ -120,7 +110,7 @@ impl Fb {
 impl Drop for Fb {
     fn drop(&mut self) {
         unsafe {
-            esp_camera_fb_return(self.fb);
+            camera::esp_camera_fb_return(self.fb);
         }
     }
 }

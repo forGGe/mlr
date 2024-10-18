@@ -36,6 +36,8 @@ anyhow = "1"
 heapless = "*"
 embedded-svc = "*"
 toml-cfg = "*"
+serde = { version = "*", default-features = false, features = ["derive"]}
+serde_json = { version = "*", default-features = false, features = ["std"] }
 
 [build-dependencies]
 embuild = "0.32.0"
