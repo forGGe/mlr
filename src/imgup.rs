@@ -100,6 +100,7 @@ pub fn send(apikey: &str, data: &[u8]) -> Result<heapless::String<64>> {
         // TODO: map error properly from rs.push_str()
         let _ = rs.push_str("https://ucarecdn.com/");
         let _ = rs.push_str(&r.file);
+        let _ = rs.push_str("/");
         Ok(rs)
     } else {
         bail!("response received: {}", response.status());

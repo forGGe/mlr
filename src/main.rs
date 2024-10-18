@@ -1,10 +1,10 @@
 use esp_idf_hal::gpio;
 use esp_idf_hal::prelude::Peripherals;
+
 mod con;
 mod espcam;
 mod imgup;
-
-mod tbup {}
+mod tbup;
 
 #[toml_cfg::toml_config]
 pub struct Config {
@@ -34,9 +34,10 @@ fn main() {
     let pwr_pin = pfs.pins.gpio14;
     let mut pwr_pin = gpio::PinDriver::output(pwr_pin).unwrap();
     pwr_pin.set_high().unwrap();
+
     log::info!("Initializing and connecting to WiFi...");
-    let wifi = con::associate(pfs.modem, CONFIG.ssid, CONFIG.pass).unwrap();
-    log::info!("Configuring I2C...");
+    let _ = con::associate(pfs.modem, CONFIG.ssid, CONFIG.pass).unwrap();
+
     log::info!("Configuring camera...");
     let cpf = espcam::CameraPeriphs {
         i2c: pfs.i2c0,
@@ -60,21 +61,24 @@ fn main() {
 
     let camera = espcam::Camera::configure(cpf).unwrap();
 
-    log::info!("Capturing image...");
-    let fb = camera.get_data().unwrap();
-    log::info!("Captured data: {} bytes", fb.slice().len());
-
     loop {
         std::thread::sleep(std::time::Duration::from_secs(10));
+
+        log::info!("Capturing image...");
+        let fb = camera.get_data().unwrap();
+
+        log::info!("Captured data: {} bytes", fb.slice().len());
+
         log::info!("Uploading image to HTTP endpoint...");
         match imgup::send(CONFIG.apikey, fb.slice()) {
             Err(e) => {
                 log::error!("{}", e);
             }
             Ok(url) => {
-                log::info!("image uploaded with URL: {}", url);
+                log::info!("Image uploaded with URL: {}", url);
+                tbup::send(CONFIG.tbkey, &url).unwrap();
             }
         }
-        log::info!("tick...");
+        log::info!("Taking another picture soon...");
     }
 }
