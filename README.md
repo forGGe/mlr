@@ -1,5 +1,7 @@
 # Rust Demo Firmware For [Tokay Lite Camera](https://maxlab.io/store/edge-ai-camera/)
 
+![ThingsBoard dashboard](doc/full_dashboard.png)
+
 ## Necessary Preparation
 
 ### Build Environment
