@@ -1,0 +1,24 @@
+{
+  "fqn": "imagewidget2",
+  "name": "Image Display Widget",
+  "deprecated": false,
+  "image": null,
+  "description": null,
+  "descriptor": {
+    "type": "latest",
+    "sizeX": 7.5,
+    "sizeY": 3,
+    "resources": [],
+    "templateHtml": "<div class=\"image-widget\">\n    <div fxFlex fxLayout=\"row\" *ngFor=\"let imageData of data\" fxLayoutAlign=\"space-around center\">\n        <img src=\"{{imageData.data[0] && imageData.data[0][1]}}\" alt=\"Image\" style=\"max-width: 100%; max-height: 100%;\">\n    </div>\n</div>",
+    "templateCss": ".image-widget {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  height: 100%;\n}\n\n.image-widget img {\n  max-width: 100%;\n  max-height: 100%;\n  width: auto;\n  height: auto;\n  object-fit: contain;\n}",
+    "controllerScript": "self.onInit = function() {\n  // Retrieve the image URL from widget settings or use a default value\n    self.ctx.$scope.data = self.ctx.defaultSubscription.data;\n};\n\nself.onDataUpdated = function() {\n  // Logic to update imageUrl based on data (if needed)\n    self.ctx.detectChanges();\n};\n\nself.onDestroy = function() {\n  // Cleanup tasks (if needed)\n};",
+    "settingsSchema": "",
+    "dataKeySettingsSchema": "",
+    "settingsDirective": "tb-html-card-widget-settings",
+    "dataKeySettingsDirective": "imageUrl",
+    "hasBasicMode": false,
+    "defaultConfig": "{\"datasources\":[{\"type\":\"static\",\"name\":\"function\",\"dataKeys\":[{\"name\":\"f(x)\",\"type\":\"function\",\"label\":\"Random\",\"color\":\"#2196f3\",\"settings\":{},\"_hash\":0.15479322438769105,\"funcBody\":\"var value = prevValue + Math.random() * 100 - 50;\\nvar multiplier = Math.pow(10, 2 || 0);\\nvar value = Math.round(value * multiplier) / multiplier;\\nif (value < -1000) {\\n\\tvalue = -1000;\\n} else if (value > 1000) {\\n\\tvalue = 1000;\\n}\\nreturn value;\"}]}],\"timewindow\":{\"realtime\":{\"timewindowMs\":60000}},\"showTitle\":false,\"backgroundColor\":\"rgb(255, 255, 255)\",\"color\":\"rgba(0, 0, 0, 0.87)\",\"padding\":\"8px\",\"settings\":{\"cardHtml\":\"<div class='card'>HTML code here</div>\",\"cardCss\":\".card {\\n    font-weight: bold;\\n    font-size: 32px;\\n    color: #999;\\n    width: 100%;\\n    height: 100%;\\n    display: flex;\\n    align-items: center;\\n    justify-content: center;\\n}\"},\"title\":\"HTML Card\",\"dropShadow\":true}"
+  },
+  "scada": false,
+  "tags": null
+}

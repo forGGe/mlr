@@ -2,7 +2,7 @@ use std::ffi::c_void;
 
 use anyhow::{anyhow, Result};
 use esp_idf_hal::{
-    gpio::{AnyIOPin, InputPin, OutputPin, Pin, Pins},
+    gpio::{AnyIOPin, Pin},
     i2c::{self, I2cConfig, I2cDriver},
     peripheral::Peripheral,
 };
@@ -110,6 +110,7 @@ impl<'d> Camera<'d> {
     }
 }
 
+// Camera framebuffer wrapper
 pub struct Fb {
     fb: *mut camera::camera_fb_t,
 }

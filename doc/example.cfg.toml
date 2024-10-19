@@ -1,0 +1,5 @@
+[mlr]
+ssid = "wifi_network_name"
+pass = "wifi_network_pass"
+apikey = "upload_care_api_key"
+tbkey = "thingsboard_access_key"
