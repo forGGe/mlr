@@ -20,7 +20,6 @@ opt-level = "z"
 [features]
 default = ["std", "embassy", "esp-idf-svc/native"]
 
-pio = ["esp-idf-svc/pio"]
 std = ["alloc", "esp-idf-svc/binstart", "esp-idf-svc/std"]
 alloc = ["esp-idf-svc/alloc"]
 nightly = ["esp-idf-svc/nightly"]

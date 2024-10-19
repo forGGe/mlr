@@ -57,23 +57,40 @@ impl<'d> Camera<'d> {
             pin_vsync: cpf.pin_vsync.pin(),
             pin_href: cpf.pin_href.pin(),
             pin_pclk: cpf.pin_pclk.pin(),
-            xclk_freq_hz: 15000000,
+            xclk_freq_hz: 4000000,
             ledc_timer: camera::ledc_timer_t_LEDC_TIMER_0,
             ledc_channel: camera::ledc_channel_t_LEDC_CHANNEL_0,
             pixel_format: camera::pixformat_t_PIXFORMAT_JPEG,
-            frame_size: camera::framesize_t_FRAMESIZE_VGA,
-            jpeg_quality: 10,
+            frame_size: camera::framesize_t_FRAMESIZE_HD,
+            jpeg_quality: 8,
             fb_count: 1,
-            fb_location: camera::camera_fb_location_t_CAMERA_FB_IN_DRAM,
+            fb_location: camera::camera_fb_location_t_CAMERA_FB_IN_PSRAM,
             grab_mode: camera::camera_grab_mode_t_CAMERA_GRAB_WHEN_EMPTY,
             sccb_i2c_port: i2c.port() as i32,
-            __bindgen_anon_1: camera::camera_config_t__bindgen_ty_1 { pin_sscb_sda: -1 },
-            __bindgen_anon_2: camera::camera_config_t__bindgen_ty_2 { pin_sscb_scl: -1 },
+            __bindgen_anon_1: camera::camera_config_t__bindgen_ty_1 {
+                pin_sscb_sda: -1,
+            },
+            __bindgen_anon_2: camera::camera_config_t__bindgen_ty_2 {
+                pin_sscb_scl: -1,
+            },
         };
 
         let err = unsafe { camera::esp_camera_init(&ccfg) };
 
         if err == esp_idf_sys::ESP_OK {
+            // Little hack to improve image quality - increase rise time of
+            // the clock signal to workaround SI/PI issues
+            unsafe {
+                camera::gpio_set_drive_capability(
+                    cpf.pin_xclk.pin(),
+                    camera::gpio_drive_cap_t_GPIO_DRIVE_CAP_0,
+                );
+
+                camera::gpio_set_drive_capability(
+                    cpf.pin_pclk.pin(),
+                    camera::gpio_drive_cap_t_GPIO_DRIVE_CAP_0,
+                );
+            }
             Ok(Self { _i2c: i2c })
         } else {
             Err(anyhow!("failed to configure the camera"))

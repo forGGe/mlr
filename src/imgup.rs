@@ -79,14 +79,15 @@ pub fn send(apikey: &str, data: &[u8]) -> Result<heapless::String<64>> {
 
     // TODO: make debug mode configurable via the config file
     // let mut request = client.post("http://192.168.10.100:8080", &headers)?;
-    let mut request = client.post("https://upload.uploadcare.com/base/", &headers)?;
+    let mut request =
+        client.post("https://upload.uploadcare.com/base/", &headers)?;
     request.write(data_head.as_slice())?;
     request.write(data)?;
     request.write(&tail.as_bytes())?;
 
     let mut response = request.submit()?;
 
-    println!("Response status: {}", response.status());
+    log::info!("Response status: {}", response.status());
 
     if response.status() == 200 {
         let mut resp_body = [0u8; 64];

@@ -35,8 +35,14 @@ fn main() {
     let mut pwr_pin = gpio::PinDriver::output(pwr_pin).unwrap();
     pwr_pin.set_high().unwrap();
 
+    // We don't care in this demo about night mode, yet
+    log::info!("Engaging IRCUT...");
+    let ircut_pin = pfs.pins.gpio48;
+    let mut ircut_pin = gpio::PinDriver::output(ircut_pin).unwrap();
+    ircut_pin.set_high().unwrap();
+
     log::info!("Initializing and connecting to WiFi...");
-    let _ = con::associate(pfs.modem, CONFIG.ssid, CONFIG.pass).unwrap();
+    let _wifi = con::associate(pfs.modem, CONFIG.ssid, CONFIG.pass).unwrap();
 
     log::info!("Configuring camera...");
     let cpf = espcam::CameraPeriphs {
