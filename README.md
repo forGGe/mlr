@@ -83,6 +83,7 @@ cargo build
 ## Further Reading and References
 
 * [Tokay AI Camera documentation page](https://docs.maxlab.io/docs/edge-ai-tokay-lite/)
+* [Camera firmware written in C](https://github.com/maxlab-io/tokay-lite-pcb/tree/main)
 * [Rust on ESP32 book](https://docs.esp-rs.org/book/)
 * [Set of nice ESP32 camera examples](https://github.com/Kezii/esp32cam_rs)
 * [Floodplain's video series on ESP32 Rust](https://www.youtube.com/watch?v=o8yNNVFzNnM&list=PL0U7YUX2VnBFbwTi96wUB1nZzPVN3HzgS)
